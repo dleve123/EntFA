@@ -23,13 +23,13 @@ from EntFA.utils import prepare_cmlm_inputs, prepare_mlm_inputs, get_probability
 
 def build_classifier(train_features, train_labels, n=30):
     classifier = neighbors.KNeighborsClassifier(n_neighbors=30, algorithm='auto')
-    
+
     x_mat = np.array(train_features)
     stds = [np.std(x_mat[:, 0]), np.std(x_mat[:, 1]), np.std(x_mat[:, 2])]
     x_mat = np.vstack([x_mat[:, 0]/stds[0],  x_mat[:, 1]/stds[1], x_mat[:, 2]/stds[2]]).transpose()
     y_vec = np.array(train_labels)
     classifier.fit(x_mat, y_vec)
-    
+
     return classifier
 
 
@@ -80,7 +80,7 @@ def main(args):
 
     # 2. load weights
     bart = BARTModel.from_pretrained(args.cmlm_model_path,
-                                     checkpoint_file='checkpoint_best.pt',
+                                     checkpoint_file=args.cmlm_checkpoint_name,
                                      data_name_or_path=args.data_name_or_path)
     prior_bart = BARTModel.from_pretrained(args.mlm_path,
                                            checkpoint_file='model.pt',
@@ -130,6 +130,13 @@ if __name__ == "__main__":
         type=str,
         required=True,
     )
+
+    parser.add_argument(
+        "--cmlm_checkpoint_name",
+        type=str,
+        required=True,
+    )
+
     parser.add_argument(
         "--data_name_or_path",
         type=str,
@@ -145,6 +152,6 @@ if __name__ == "__main__":
         type=str,
         default='.',
     )
-    
+
     args = parser.parse_args()
     main(args)
